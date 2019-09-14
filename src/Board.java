@@ -1,5 +1,3 @@
-package HiVolts;
-
 public class Board {
 
     private final int BOARD_SIZE = 12;
