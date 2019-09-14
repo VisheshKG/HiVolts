@@ -1,4 +1,8 @@
 package HiVolts;
 
-public class Player {
+public class Player extends Item {
+
+    public String toString() {
+        return "P";
+    }
 }
