@@ -1,4 +1,3 @@
-package HiVolts;
 
 public class Board {
 
