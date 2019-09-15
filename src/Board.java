@@ -9,12 +9,12 @@ public class Board {
         //Add fences down the left and right of the map
         for (int i = 0; i < BOARD_SIZE; i++) {
             board[i][0] = new Fence();
-            board[i][BOARD_SIZE] = new Fence();
+            board[i][BOARD_SIZE - 1] = new Fence();
         }
         //Add fences accross the top and bottom of the map
         for (int j =  0; j < BOARD_SIZE; j++) {
             board[0][j] = new Fence();
-            board[BOARD_SIZE][j] = new Fence();
+            board[BOARD_SIZE - 1][j] = new Fence();
         }
 
         //randomly add 20 fences
@@ -53,6 +53,10 @@ public class Board {
         }
 
         board[x][y] = new Player();
+    }
+
+    public void update(int px, int py) {
+
     }
 
     public void print() {
