@@ -60,8 +60,8 @@ public class Board {
     }
 
     public int[] playerMove(char direction) {
-        int x ;
-        int y;
+        int x = 0;
+        int y = 0;
 
         for (int i = 1; i < board.length - 1; i++)  {
             for (int j = 1; j < board[i].length - 1; j++) {
