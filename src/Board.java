@@ -97,7 +97,7 @@ public class Board {
         }
     }
 
-    public int[] mhoMove(int mhoX, int mhoY, int playerX, int playerY) {
+    public void mhoMove(int mhoX, int mhoY, int playerX, int playerY) {
         int[] coords = new int[2];
     /*
     1. if the mho is on the same x-value but lower in height than the player
@@ -181,8 +181,18 @@ public class Board {
             coords[1] = mhoY - 1;
             System.out.println("eight");
         }
+        if(board[coords[0]][coords[1]] == null) {
+            board[mhoX][mhoY] = null;
+            board[coords[0]][coords[1]] = new Mho();
+        } else if(board[coords[0]][coords[1]] == Fence) {
+            board[mhoX][mhoY] = null;
+        } else if(board[coords[0]][coords[1]] == Player) {
+            lose();
+        }
+    }
 
-        return coords;
+    private void lose() {
+
     }
 
 
