@@ -58,7 +58,7 @@ public class Board {
     public void update() {
 
     }
-
+  
     public int[] playerMove(char direction) {
         int x = 0;
         int y = 0;
@@ -186,18 +186,22 @@ public class Board {
     }
 
 
+    public Item[][] getBoard() {
+        return board;
+    }
+
 
     public void print() {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 if (board[i][j] != null) {
                     System.out.print(board[i][j].toString());
-                }
-                else {
+                } else {
                     System.out.print(" ");
                 }
             }
             System.out.println();
         }
+
     }
 }
