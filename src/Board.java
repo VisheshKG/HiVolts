@@ -9,6 +9,10 @@ public class Board {
     public static final int BOARD_SIZE = 12;
     public static final int NUM_FENCES = 20;
     public static final int NUM_MHOS = 12;
+
+    private int playerX;
+    private int playerY;
+
     private Item[][] board = new Item[BOARD_SIZE][BOARD_SIZE];
 
     private static BufferedImage fence;
@@ -62,6 +66,8 @@ public class Board {
             y = randomBoardInt();
         }
 
+        playerX = x;
+        playerY = y;
         board[x][y] = new Player();
 
         try {
@@ -82,53 +88,59 @@ public class Board {
 
 
     public void playerMove(char direction) {
-        int x = 0;
-        int y = 0;
 
-        //finding the player on the board and setting player's x and y value
-        for (int i = 1; i < board.length - 1; i++)  {
-            for (int j = 1; j < board[i].length - 1; j++) {
-                if (board[i][j].toString().equals("P"));
-                x = i;
-                y = j;
-            }
-        }
+        board[playerX][playerY] = null;
 
         switch (direction) {
             case 'q':
-                x--;
-                y--;
+                playerX--;
+                playerY--;
                 break;
             case 'w':
-                y--;
+                playerY--;
                 break;
             case 'e':
-                x++;
-                y--;
+                playerX++;
+                playerY--;
                 break;
             case 'a':
-                x--;
+                playerX--;
                 break;
             case 'd':
-                x++;
+                playerX++;
                 break;
             case 'z':
-                x--;
-                y++;
+                playerX--;
+                playerY++;
                 break;
             case 'x':
-                y++;
+                playerY++;
                 break;
             case 'c':
-                x++;
-                y++;
+                playerX++;
+                playerY++;
                 break;
             case 'j':
-                x = randomBoardInt();
-                y = randomBoardInt();
+                playerX = randomBoardInt();
+                playerY = randomBoardInt();
+                break;
+            default:
                 break;
         }
-        // TODO: What happens when you land on a occupied cell
+        if (board[playerX][playerY] != null) {
+            if (board[playerX][playerY].toString().equals("F")) {
+                lose();
+            }
+            else if (board[playerX][playerY].toString().equals("M")) {
+                lose();
+            }
+            else if (board[playerX][playerY].toString().equals("P")) {
+                board[playerX][playerY] = new Player();
+            }
+        }
+        else {
+            board[playerX][playerY] = new Player();
+        }
 
 
     }
