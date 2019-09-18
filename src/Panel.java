@@ -1,31 +1,19 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 
 public class Panel extends JPanel {
 
-    public static BufferedImage fence;
-    public static BufferedImage mho;
-    public static BufferedImage player;
+    private Board board;
 
-    public Panel() {
-        super();
-        try {
-            fence = ImageIO.read(new File("Fence.png"));
-            mho = ImageIO.read(new File("Mho.png"));
-            player = ImageIO.read(new File("Player.png"));
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+    public Panel(Board b) {
+        board = b;
     }
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-
-
+        board.paintBoard(g);
     }
 }
