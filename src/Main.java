@@ -6,26 +6,31 @@ public class Main {
     public static void main(String[] arg) {
         System.out.println("Hello  World");
 
-        Board b;
+        Board board;
 
         try {
-            b = new Board();
+            board = new Board();
             System.out.println("Finished constructing Board");
-            b.print();
+            board.print();
         }
         catch (IOException e) {
             System.out.println("IOException in constructing Board.");
             return;
         }
 
+        Panel panel = new Panel(board);
+        panel.setFocusable(true);
+        panel.addKeyListener(panel);
+
         JFrame frame = new JFrame("HiVolts");
         frame.setSize(720, 720);
         frame.setBackground(Color.BLACK);
         frame.setLayout(new BorderLayout());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new Panel(b));
+        frame.getContentPane().add(panel);
         frame.setVisible(true);
-
 
     }
 }
+
+

@@ -1,5 +1,7 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -10,10 +12,11 @@ public class Board {
     public static final int NUM_FENCES = 20;
     public static final int NUM_MHOS = 12;
 
-    private int playerX;
-    private int playerY;
+    private int playerCol;
+    private int playerRow;
 
     private Item[][] board = new Item[BOARD_SIZE][BOARD_SIZE];
+    private int turns = 0;
 
     private static BufferedImage fence;
     private static BufferedImage mho;
@@ -66,8 +69,8 @@ public class Board {
             y = randomBoardInt();
         }
 
-        playerX = x;
-        playerY = y;
+        playerRow = x;
+        playerCol = y;
         board[x][y] = new Player();
 
         try {
@@ -81,111 +84,130 @@ public class Board {
         }
     }
 
-    public void update(char keyPressed) {
-        playerMove(keyPressed);
+    public void updateBoard(char keyPressed) {
+        turns++;
+
+        boolean moveMhos = playerMove(keyPressed);
+
+        //loops through the board and for every Mho and move it
+        if (moveMhos) {
+            for (int i = 1; i < board.length - 1; i++) {
+                for (int j = 1; j < board[i].length - 1; j++) {
+                    if (board[i][j] != null) {
+                        if (board[i][j].toString().equals("M")) {
+                            mhoMove(i, j);
+                        }
+                    }
+                }
+            }
+        }
 
     }
 
 
-    public void playerMove(char direction) {
+    public boolean playerMove(char direction) {
 
-        board[playerX][playerY] = null;
+        boolean moveMhos = true;
+        board[playerRow][playerCol] = null;
 
         switch (direction) {
             case 'q':
-                playerX--;
-                playerY--;
+                playerCol--;
+                playerRow--;
                 break;
             case 'w':
-                playerY--;
+                playerRow--;
                 break;
             case 'e':
-                playerX++;
-                playerY--;
+                playerCol++;
+                playerRow--;
                 break;
             case 'a':
-                playerX--;
+                playerCol--;
+                break;
+            case 's':
                 break;
             case 'd':
-                playerX++;
+                playerCol++;
                 break;
             case 'z':
-                playerX--;
-                playerY++;
+                playerCol--;
+                playerRow++;
                 break;
             case 'x':
-                playerY++;
+                playerRow++;
                 break;
             case 'c':
-                playerX++;
-                playerY++;
+                playerCol++;
+                playerRow++;
                 break;
             case 'j':
-                playerX = randomBoardInt();
-                playerY = randomBoardInt();
+                playerCol = randomBoardInt();
+                playerRow = randomBoardInt();
+                moveMhos = false;
                 break;
             default:
+                moveMhos = false;
+                turns--;
                 break;
         }
-        if (board[playerX][playerY] != null) {
-            if (board[playerX][playerY].toString().equals("F")) {
-                lose();
-            }
-            else if (board[playerX][playerY].toString().equals("M")) {
-                lose();
-            }
-            else if (board[playerX][playerY].toString().equals("P")) {
-                board[playerX][playerY] = new Player();
-            }
+
+        // if new cell is occupied it can only be a Mho or Fence, hence player loses.
+        if (board[playerRow][playerCol] != null) {
+                 lose();
         }
         else {
-            board[playerX][playerY] = new Player();
+            board[playerRow][playerCol] = new Player();
         }
-
-
+        System.out.println("Player moved to {"+playerRow+","+playerCol+"}");
+        return moveMhos;
     }
 
-    public void mhoMove(int mhoX, int mhoY, int playerX, int playerY) {
-        int[] coords = new int[2];
+    public void mhoMove(int row, int column) {
+        int newRow = row;
+        int newCol = column;
 
-    // 1. if the mho is on the same x-value but lower in height than the player
-    // 2. if the mho is on the same x-value but higher in height than the player
-    // 3. if the mho is on the same y-value but higher in width than the player
-    // 4. if the mho is on the same y-value but lower in width than the player
+        // MOVEMENT PART 1
+        // 1. if the mho is on the same x-value but lower in height than the player
+        // 2. if the mho is on the same x-value but higher in height than the player
+        // 3. if the mho is on the same y-value but higher in width than the player
+        // 4. if the mho is on the same y-value but lower in width than the player
 
-        if (playerX == mhoX && playerY > mhoY) {
-            coords[0] = mhoX;
-            coords[1] = mhoY + 1;
-        } else if (playerX == mhoX && playerY < mhoY) {
-            coords[0] = mhoX;
-            coords[1] = mhoY - 1;
-        } else if (playerX > mhoX && playerY == mhoY) {
-            coords[0] = mhoX + 1;
-            coords[1] = mhoY;
-        } else if (playerX < mhoY && playerY == mhoY) {
-            coords[0] = mhoX - 1;
-            coords[1] = mhoY;
+        if (playerCol == column && playerRow > row) {
+            newCol = column;
+            newRow = row + 1;
+        } else if (playerCol == column && playerRow < row) {
+            newCol = column;
+            newRow = row - 1;
+        } else if (playerCol > column && playerRow == row) {
+            newCol = column + 1;
+            newRow = row;
+        } else if (playerCol < row && playerRow == row) {
+            newCol = column - 1;
+            newRow = row;
         }
 
+        // MOVEMENT PART 2 - 1
         // 1. if the mho is directly diagonal and must go northeast
         // 2. if the mho is directly diagonal and must go southeast
         // 3. if the mho is directly diagonal and must go southwest
         // 4. if the mho is directly diagonal and must go northwest
 
-        if (playerX - mhoX == 0 - (playerY - mhoY) && playerX - mhoX > 0) {
-            coords[0] = mhoX + 1;
-            coords[1] = mhoY - 1;
-        } else if (playerX - mhoX == playerY - mhoY && playerX - mhoX > 0) {
-            coords[0] = mhoX + 1;
-            coords[1] = mhoY + 1;
-        } else if (playerX - mhoX == 0 - (playerY - mhoY) && playerX - mhoX < 0) {
-            coords[0] = mhoX - 1;
-            coords[1] = mhoY + 1;
-        } else if (playerX - mhoX == playerY - mhoY && playerX - mhoX < 0) {
-            coords[0] = mhoX - 1;
-            coords[1] = mhoY - 1;
+        if (playerCol - column == 0 - (playerRow - row) && playerCol - column > 0) {
+            newCol = column + 1;
+            newRow = row - 1;
+        } else if (playerCol - column == playerRow - row && playerCol - column > 0) {
+            newCol = column + 1;
+            newRow = row + 1;
+        } else if (playerCol - column == 0 - (playerRow - row) && playerCol - column < 0) {
+            newCol = column - 1;
+            newRow = row + 1;
+        } else if (playerCol - column == playerRow - row && playerCol - column < 0) {
+            newCol = column - 1;
+            newRow = row - 1;
         }
 
+        // MOTION PART 2 - 2
         // 1. if the mho's x-distance is greater than it's y distance and it must go northeast
         // 2. if the mho's x distance is lower than it's y distance and it must go northeast
         // 3. if the mho's x distance is greater than it's y distance and it must go southeast
@@ -196,51 +218,53 @@ public class Board {
         // 8. if the mho's x-distance is lower than it's y distance and it must go northwest
 
         //this area needs more work
-        if(playerX - mhoX > 0 - (playerY - mhoY) && playerX > mhoX && playerY < mhoY) {
-            coords[0] = mhoX + 1;
-            coords[1] = mhoY;
+        if(playerCol - column > 0 - (playerRow - row) && playerCol > column && playerRow < row) {
+            newCol = column + 1;
+            newRow = row;
             System.out.println("one");
-        } else if(playerX - mhoX < 0 - (playerY - mhoY) && playerX > mhoX && playerY < mhoY) {
-            coords[0] = mhoX;
-            coords[1] = mhoY - 1;
+        } else if(playerCol - column < 0 - (playerRow - row) && playerCol > column && playerRow < row) {
+            newCol = column;
+            newRow = row - 1;
             System.out.println("two");
-        } else if(playerX - mhoX > playerY - mhoY && playerX > mhoX && playerY > mhoY) {
-            coords[0] = mhoX + 1;
-            coords[1] = mhoY;
+        } else if(playerCol - column > playerRow - row && playerCol > column && playerRow > row) {
+            newCol = column + 1;
+            newRow = row;
             System.out.println("three");
-        } else if(playerX - mhoX < playerY - mhoY && playerX > mhoX && playerY > mhoY) {
-            coords[0] = mhoX;
-            coords[1] = mhoY + 1;
+        } else if(playerCol - column < playerRow - row && playerCol > column && playerRow > row) {
+            newCol = column;
+            newRow = row + 1;
             System.out.println("four");
-        } else if(playerX - mhoX < 0 - (playerY - mhoY) && playerX < mhoX && playerY > mhoY) {
-            coords[0] = mhoX - 1;
-            coords[1] = mhoY;
+        } else if(playerCol - column < 0 - (playerRow - row) && playerCol < column && playerRow > row) {
+            newCol = column - 1;
+            newRow = row;
             System.out.println("five");
-        } else if(playerX - mhoX > 0 - (playerY - mhoY) && playerX < mhoX && playerY > mhoY) {
-            coords[0] = mhoX;
-            coords[1] = mhoY + 1;
+        } else if(playerCol - column > 0 - (playerRow - row) && playerCol < column && playerRow > row) {
+            newCol = column;
+            newRow = row + 1;
             System.out.println("six");
-        } else if(playerX - mhoX < playerY - mhoY && playerX < mhoX && playerY < mhoY) {
-            coords[0] = mhoX - 1;
-            coords[1] = mhoY;
+        } else if(playerCol - column < playerRow - row && playerCol < column && playerRow < row) {
+            newCol = column - 1;
+            newRow = row;
             System.out.println("seven");
-        } else if(playerX - mhoX > playerY - mhoY && playerX < mhoX && playerY < mhoY) {
-            coords[0] = mhoX;
-            coords[1] = mhoY - 1;
+        } else if(playerCol - column > playerRow - row && playerCol < column && playerRow < row) {
+            newCol = column;
+            newRow = row - 1;
             System.out.println("eight");
         }
-        if(board[coords[0]][coords[1]] == null) {
-            board[mhoX][mhoY] = null;
-            board[coords[0]][coords[1]] = new Mho();
-        } else if(board[coords[0]][coords[1]].toString().equals("F")) {
-            board[mhoX][mhoY] = null;
-        } else if(board[coords[0]][coords[1]].toString().equals("P")) {
+
+
+        if(board[newRow][newCol] == null) {
+            board[row][column] = null;
+            board[newRow][newCol] = new Mho();
+        } else if(board[newRow][newCol].toString().equals("F")) {
+            board[row][column] = null;
+        } else if(board[newRow][newCol].toString().equals("P")) {
             lose();
         }
     }
 
     private void lose() {
-
+        System.out.println("You lose");
     }
 
     //find a random number between 1 and 10 (index of board is 0 to 11 - excludes outsides of board)
@@ -287,4 +311,5 @@ public class Board {
         }
 
     }
+
 }
