@@ -7,8 +7,8 @@ import java.io.IOException;
 public class Board {
 
     public static final int BOARD_SIZE = 12;
-    public static final int NUM_FENCES = 0;
-    public static final int NUM_MHOS = 1;
+    public static final int NUM_FENCES = 20;
+    public static final int NUM_MHOS = 12;
 
     public static boolean playing = true;
 
@@ -16,7 +16,8 @@ public class Board {
     private int playerRow;
 
     private Item[][] board = new Item[BOARD_SIZE][BOARD_SIZE];
-    private int turns = 0;
+    private Integer turns = 0;
+    private int globalMoves = 0;
 
     private static BufferedImage fence;
     private static BufferedImage mho;
@@ -95,8 +96,8 @@ public class Board {
                 for (int j = 1; j < board[i].length - 1; j++) {
                     if (board[i][j] != null) {
                         if (board[i][j].toString().equals("M")) {
-                            if (board[i][j].getMoves() == turns) {
-                                board[i][j].setMoves(turns + 1);
+                            if (board[i][j].getMoves() == globalMoves) {
+                                board[i][j].setMoves(globalMoves + 1);
                                 mhoMove(i, j);
                             }
                         }
@@ -104,7 +105,7 @@ public class Board {
                 }
             }
         }
-
+        globalMoves++;
         turns++;
     }
 
@@ -148,11 +149,13 @@ public class Board {
             case 'j':
                 playerCol = randomBoardInt();
                 playerRow = randomBoardInt();
+                globalMoves--;
                 moveMhos = false;
                 break;
             default:
                 moveMhos = false;
                 turns--;
+                globalMoves--;
                 break;
         }
 
@@ -306,6 +309,11 @@ public class Board {
                 }
             }
         }
+        g.setColor(Color.GRAY);
+        g.fillRect(5, 5,130, 50);
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
+        g.drawString("Turns: " + turns.toString(), 10, 40);
     }
 
     public void print() {
