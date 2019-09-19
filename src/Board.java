@@ -1,7 +1,5 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -9,8 +7,10 @@ import java.io.IOException;
 public class Board {
 
     public static final int BOARD_SIZE = 12;
-    public static final int NUM_FENCES = 20;
-    public static final int NUM_MHOS = 12;
+    public static final int NUM_FENCES = 0;
+    public static final int NUM_MHOS = 1;
+
+    public static boolean playing = true;
 
     private int playerCol;
     private int playerRow;
@@ -85,7 +85,7 @@ public class Board {
     }
 
     public void updateBoard(char keyPressed) {
-        turns++;
+
 
         boolean moveMhos = playerMove(keyPressed);
 
@@ -95,13 +95,17 @@ public class Board {
                 for (int j = 1; j < board[i].length - 1; j++) {
                     if (board[i][j] != null) {
                         if (board[i][j].toString().equals("M")) {
-                            mhoMove(i, j);
+                            if (board[i][j].getMoves() == turns) {
+                                board[i][j].setMoves(turns + 1);
+                                mhoMove(i, j);
+                            }
                         }
                     }
                 }
             }
         }
 
+        turns++;
     }
 
 
@@ -164,107 +168,113 @@ public class Board {
     }
 
     public void mhoMove(int row, int column) {
-        int newRow = row;
-        int newCol = column;
 
-        // MOVEMENT PART 1
-        // 1. if the mho is on the same x-value but lower in height than the player
-        // 2. if the mho is on the same x-value but higher in height than the player
-        // 3. if the mho is on the same y-value but higher in width than the player
-        // 4. if the mho is on the same y-value but lower in width than the player
+            int newRow = row;
+            int newCol = column;
 
-        if (playerCol == column && playerRow > row) {
-            newCol = column;
-            newRow = row + 1;
-        } else if (playerCol == column && playerRow < row) {
-            newCol = column;
-            newRow = row - 1;
-        } else if (playerCol > column && playerRow == row) {
-            newCol = column + 1;
-            newRow = row;
-        } else if (playerCol < row && playerRow == row) {
-            newCol = column - 1;
-            newRow = row;
-        }
+            // MOVEMENT PART 1
+            // 1. if the mho is on the same x-value but lower in height than the player
+            // 2. if the mho is on the same x-value but higher in height than the player
+            // 3. if the mho is on the same y-value but higher in width than the player
+            // 4. if the mho is on the same y-value but lower in width than the player
 
-        // MOVEMENT PART 2 - 1
-        // 1. if the mho is directly diagonal and must go northeast
-        // 2. if the mho is directly diagonal and must go southeast
-        // 3. if the mho is directly diagonal and must go southwest
-        // 4. if the mho is directly diagonal and must go northwest
+            if (playerCol == column && playerRow > row) {
+                newCol = column;
+                newRow = row + 1;
+            } else if (playerCol == column && playerRow < row) {
+                newCol = column;
+                newRow = row - 1;
+            } else if (playerCol > column && playerRow == row) {
+                newCol = column + 1;
+                newRow = row;
+            } else if (playerCol < row && playerRow == row) {
+                newCol = column - 1;
+                newRow = row;
+            }
 
-        if (playerCol - column == 0 - (playerRow - row) && playerCol - column > 0) {
-            newCol = column + 1;
-            newRow = row - 1;
-        } else if (playerCol - column == playerRow - row && playerCol - column > 0) {
-            newCol = column + 1;
-            newRow = row + 1;
-        } else if (playerCol - column == 0 - (playerRow - row) && playerCol - column < 0) {
-            newCol = column - 1;
-            newRow = row + 1;
-        } else if (playerCol - column == playerRow - row && playerCol - column < 0) {
-            newCol = column - 1;
-            newRow = row - 1;
-        }
+            // MOVEMENT PART 2 - 1
+            // 1. if the mho is directly diagonal and must go northeast
+            // 2. if the mho is directly diagonal and must go southeast
+            // 3. if the mho is directly diagonal and must go southwest
+            // 4. if the mho is directly diagonal and must go northwest
 
-        // MOTION PART 2 - 2
-        // 1. if the mho's x-distance is greater than it's y distance and it must go northeast
-        // 2. if the mho's x distance is lower than it's y distance and it must go northeast
-        // 3. if the mho's x distance is greater than it's y distance and it must go southeast
-        // 4. if the mho's x distance is lower than it's y distance and it must go southeast
-        // 5. if the mho's x distance is greater than it's y distance and it must go southwest
-        // 6. if the mho's x-distance is lower than it's y distance and it must go southwest
-        // 7. if the mho's x-distance is greater than it's y distance and it must go northwest
-        // 8. if the mho's x-distance is lower than it's y distance and it must go northwest
+            if (playerCol - column == 0 - (playerRow - row) && playerCol - column > 0) {
+                newCol = column + 1;
+                newRow = row - 1;
+            } else if (playerCol - column == playerRow - row && playerCol - column > 0) {
+                newCol = column + 1;
+                newRow = row + 1;
+            } else if (playerCol - column == 0 - (playerRow - row) && playerCol - column < 0) {
+                newCol = column - 1;
+                newRow = row + 1;
+            } else if (playerCol - column == playerRow - row && playerCol - column < 0) {
+                newCol = column - 1;
+                newRow = row - 1;
+            }
 
-        //this area needs more work
-        if(playerCol - column > 0 - (playerRow - row) && playerCol > column && playerRow < row) {
-            newCol = column + 1;
-            newRow = row;
-            System.out.println("one");
-        } else if(playerCol - column < 0 - (playerRow - row) && playerCol > column && playerRow < row) {
-            newCol = column;
-            newRow = row - 1;
-            System.out.println("two");
-        } else if(playerCol - column > playerRow - row && playerCol > column && playerRow > row) {
-            newCol = column + 1;
-            newRow = row;
-            System.out.println("three");
-        } else if(playerCol - column < playerRow - row && playerCol > column && playerRow > row) {
-            newCol = column;
-            newRow = row + 1;
-            System.out.println("four");
-        } else if(playerCol - column < 0 - (playerRow - row) && playerCol < column && playerRow > row) {
-            newCol = column - 1;
-            newRow = row;
-            System.out.println("five");
-        } else if(playerCol - column > 0 - (playerRow - row) && playerCol < column && playerRow > row) {
-            newCol = column;
-            newRow = row + 1;
-            System.out.println("six");
-        } else if(playerCol - column < playerRow - row && playerCol < column && playerRow < row) {
-            newCol = column - 1;
-            newRow = row;
-            System.out.println("seven");
-        } else if(playerCol - column > playerRow - row && playerCol < column && playerRow < row) {
-            newCol = column;
-            newRow = row - 1;
-            System.out.println("eight");
-        }
+            // MOTION PART 2 - 2
+            // 1. if the mho's x-distance is greater than it's y distance and it must go northeast
+            // 2. if the mho's x distance is lower than it's y distance and it must go northeast
+            // 3. if the mho's x distance is greater than it's y distance and it must go southeast
+            // 4. if the mho's x distance is lower than it's y distance and it must go southeast
+            // 5. if the mho's x distance is greater than it's y distance and it must go southwest
+            // 6. if the mho's x-distance is lower than it's y distance and it must go southwest
+            // 7. if the mho's x-distance is greater than it's y distance and it must go northwest
+            // 8. if the mho's x-distance is lower than it's y distance and it must go northwest
+
+            //this area needs more work
+            if (playerCol - column > 0 - (playerRow - row) && playerCol > column && playerRow < row) {
+                newCol = column + 1;
+                newRow = row;
+                System.out.println("one");
+            } else if (playerCol - column < 0 - (playerRow - row) && playerCol > column && playerRow < row) {
+                newCol = column;
+                newRow = row - 1;
+                System.out.println("two");
+            } else if (playerCol - column > playerRow - row && playerCol > column && playerRow > row) {
+                newCol = column + 1;
+                newRow = row;
+                System.out.println("three");
+            } else if (playerCol - column < playerRow - row && playerCol > column && playerRow > row) {
+                newCol = column;
+                newRow = row + 1;
+                System.out.println("four");
+            } else if (playerCol - column < 0 - (playerRow - row) && playerCol < column && playerRow > row) {
+                newCol = column - 1;
+                newRow = row;
+                System.out.println("five");
+            } else if (playerCol - column > 0 - (playerRow - row) && playerCol < column && playerRow > row) {
+                newCol = column;
+                newRow = row + 1;
+                System.out.println("six");
+            } else if (playerCol - column < playerRow - row && playerCol < column && playerRow < row) {
+                newCol = column - 1;
+                newRow = row;
+                System.out.println("seven");
+            } else if (playerCol - column > playerRow - row && playerCol < column && playerRow < row) {
+                newCol = column;
+                newRow = row - 1;
+                System.out.println("eight");
+            }
 
 
-        if(board[newRow][newCol] == null) {
-            board[row][column] = null;
-            board[newRow][newCol] = new Mho();
-        } else if(board[newRow][newCol].toString().equals("F")) {
-            board[row][column] = null;
-        } else if(board[newRow][newCol].toString().equals("P")) {
-            lose();
-        }
+            if (board[newRow][newCol] == null) {
+                Item temp = board[row][column];
+                board[row][column] = null;
+                board[newRow][newCol] = temp;
+            } else if (board[newRow][newCol].toString().equals("F")) {
+                board[row][column] = null;
+                System.out.println(newRow + newCol);
+            } else if (board[newRow][newCol].toString().equals("P")) {
+                System.out.println("Killed by Mho");
+                lose();
+            }
+
     }
 
     private void lose() {
         System.out.println("You lose");
+        playing = false;
     }
 
     //find a random number between 1 and 10 (index of board is 0 to 11 - excludes outsides of board)
